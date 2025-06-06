@@ -8,8 +8,12 @@ export async function GET() {
   try {
     const detalles = await prisma.detalleOrdenCompra.findMany();
     return NextResponse.json(detalles, { status: 200 });
-  } catch (error) {
-    console.error('Error fetching detalleOrdenCompra:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error fetching detalleOrdenCompra:', error.message);
+    } else {
+      console.error('Error desconocido fetching detalleOrdenCompra');
+    }
     return NextResponse.json({ error: 'Error fetching detalles' }, { status: 500 });
   }
 }
@@ -41,9 +45,12 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(detalle, { status: 201 });
-  } catch (error) {
-    console.error('Error creando detalle orden:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error creando detalle orden:', error.message);
+    } else {
+      console.error('Error desconocido creando detalle orden');
+    }
     return NextResponse.json({ error: 'Error creando detalle orden' }, { status: 500 });
   }
 }
-

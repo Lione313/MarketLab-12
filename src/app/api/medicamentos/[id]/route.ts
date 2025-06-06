@@ -20,8 +20,12 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     }
 
     return NextResponse.json(medicamento, { status: 200 });
-  } catch (error) {
-    console.error('Error obteniendo medicamento:', error);
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('Error obteniendo medicamento:', error.message);
+    } else {
+      console.error('Error desconocido obteniendo medicamento');
+    }
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
@@ -44,15 +48,27 @@ export async function PUT(request: Request, { params }: { params: { id: string }
     });
 
     return NextResponse.json(medicamento, { status: 200 });
-  } catch (error: any) {
-    console.error('Error actualizando medicamento:', error);
-    if (error.code === 'P2025') { // Prisma error código para "registro no encontrado"
+  } catch (error: unknown) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as any).code === 'P2025'
+    ) {
       return NextResponse.json({ error: 'Medicamento no encontrado para actualizar' }, { status: 404 });
     }
+
+    if (error instanceof Error) {
+      console.error('Error actualizando medicamento:', error.message);
+    } else {
+      console.error('Error desconocido actualizando medicamento');
+    }
+
     return NextResponse.json({ error: 'Error interno del servidor' }, { status: 500 });
   }
 }
 
+// DELETE medicamento
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -68,10 +84,13 @@ export async function DELETE(
     });
 
     return NextResponse.json({ message: 'Medicamento eliminado correctamente' });
-  } catch (error: any) {
-    console.error('Error eliminando medicamento:', error);
-
-    if (error.code === 'P2003') {
+  } catch (error: unknown) {
+    if (
+      typeof error === 'object' &&
+      error !== null &&
+      'code' in error &&
+      (error as any).code === 'P2003'
+    ) {
       // Error de clave foránea
       return NextResponse.json(
         { error: 'Primero debes eliminar el detalle de la compra asociado a este medicamento.' },
@@ -79,7 +98,12 @@ export async function DELETE(
       );
     }
 
+    if (error instanceof Error) {
+      console.error('Error eliminando medicamento:', error.message);
+    } else {
+      console.error('Error desconocido eliminando medicamento');
+    }
+
     return NextResponse.json({ error: 'Error eliminando medicamento' }, { status: 500 });
   }
 }
-

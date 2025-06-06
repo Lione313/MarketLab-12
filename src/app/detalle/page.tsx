@@ -2,8 +2,7 @@
 
 import { useEffect, useState, ChangeEvent, FormEvent } from 'react';
 import { motion } from "framer-motion";
-import { Edit, Trash2 } from 'lucide-react';
-import { X } from 'lucide-react';
+import { Edit, Trash2, X } from 'lucide-react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -59,14 +58,20 @@ function cancelDelete() {
 
   // Cargar detalles y medicamentos al inicio
   useEffect(() => {
-    fetch('/api/detalle-orden')
-      .then(res => res.json())
-      .then(data => setDetalles(data));
+  let isMounted = true;
+  
+  fetch('/api/detalle-orden')
+    .then(res => res.json())
+    .then(data => { if(isMounted) setDetalles(data); })
+    .catch(console.error);
 
-    fetch('/api/medicamentos')
-      .then(res => res.json())
-      .then(data => setMedicamentos(data));
-  }, []);
+  fetch('/api/medicamentos')
+    .then(res => res.json())
+    .then(data => { if(isMounted) setMedicamentos(data); })
+    .catch(console.error);
+
+  return () => { isMounted = false; };
+}, []);
 
   function openModal(detalle: Detalle | null = null) {
     if (detalle) {
