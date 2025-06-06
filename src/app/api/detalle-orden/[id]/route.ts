@@ -3,9 +3,11 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
-// PUT: actualizar un detalle por ID
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export async function PUT(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  const id = Number(context.params.id);
   const data = await req.json();
 
   try {
@@ -15,19 +17,20 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     });
     return NextResponse.json(updated);
   } catch (error: unknown) {
-  if (error instanceof Error) {
-    console.error('Error al actualizar detalle:', error.message);
-  } else {
-    console.error('Error desconocido al actualizar detalle');
+    if (error instanceof Error) {
+      console.error('Error al actualizar detalle:', error.message);
+    } else {
+      console.error('Error desconocido al actualizar detalle');
+    }
+    return NextResponse.json({ error: 'No se pudo actualizar' }, { status: 500 });
   }
-  return NextResponse.json({ error: 'No se pudo actualizar' }, { status: 500 });
 }
 
-}
-
-// DELETE: eliminar un detalle por ID
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number(params.id);
+export async function DELETE(
+  req: NextRequest,
+  context: { params: { id: string } }
+) {
+  const id = Number(context.params.id);
 
   try {
     const deleted = await prisma.detalleOrdenCompra.delete({
