@@ -45,10 +45,23 @@ const abrirModalEliminar = (cod: number) => {
   const [medEdit, setMedEdit] = useState<Medicamento | null>(null);
 
   useEffect(() => {
-    fetch('/api/medicamentos')
-      .then(res => res.json())
-      .then(data => setMedicamentos(data));
-  }, []);
+  fetch('/api/medicamentos')
+    .then(res => res.json())
+    .then(data => {
+      if (Array.isArray(data)) {
+        setMedicamentos(data);
+      } else {
+        // Si no es array, asigna array vacío o maneja el error
+        setMedicamentos([]);
+        console.error('Datos recibidos no son un array:', data);
+      }
+    })
+    .catch(error => {
+      setMedicamentos([]);
+      console.error('Error al obtener medicamentos:', error);
+    });
+}, []);
+
 
  const confirmarEliminarMedicamento = async () => {
   if (medicamentoToDelete === null) return;
@@ -514,45 +527,55 @@ const abrirModalEliminar = (cod: number) => {
         ))}
       </tr>
     </thead>
-    <tbody>
-      {medicamentos.map((med, idx) => (
-        <tr
-          key={med.CodMedicamento}
-          className={`bg-white ${idx % 2 === 0 ? 'bg-blue-50' : ''} hover:bg-blue-100 transition-colors duration-300 cursor-pointer`}
-        >
-          <td className="p-3 border-b border-black">{med.descripcionMed}</td>
-          <td className="p-3 border-b border-black">{med.fechaFabricacion.split('T')[0]}</td>
-          <td className="p-3 border-b border-black">{med.fechaVencimiento.split('T')[0]}</td>
-          <td className="p-3 border-b border-black">{med.presentacion}</td>
-          <td className="p-3 border-b border-black text-center">{med.stock}</td>
-          <td className="p-3 border-b border-black text-right">${med.precioVentaUni.toFixed(2)}</td>
-          <td className="p-3 border-b border-black text-right">${med.precioVentaPres.toFixed(2)}</td>
-          <td className="p-3 border-b border-black">{med.marca}</td>
-          <td className="p-3 border-b border-black flex gap-2 justify-center">
-            <button
-              onClick={() => editarMedicamento(med)}
-              className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md shadow-md transition"
-              aria-label="Editar medicamento"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M11 17h2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2h-3l-2-2H7v9a2 2 0 002 2z" />
-              </svg>
-              Editar
-            </button>
-            <button
-              onClick={() => abrirModalEliminar(med.CodMedicamento)}
-              className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow-md transition"
-              aria-label="Eliminar medicamento"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-              </svg>
-              Eliminar
-            </button>
-          </td>
-        </tr>
-      ))}
-    </tbody>
+<tbody>
+  {medicamentos.length === 0 ? (
+    <tr>
+    <td colSpan={9} className="text-center p-3">
+
+        No hay medicamentos disponibles.
+      </td>
+    </tr>
+  ) : (
+    medicamentos.map((med, idx) => (
+      <tr
+        key={med.CodMedicamento}
+        className={`bg-white ${idx % 2 === 0 ? 'bg-blue-50' : ''} hover:bg-blue-100 transition-colors duration-300 cursor-pointer`}
+      >
+        <td className="p-3 border-b border-black">{med.descripcionMed}</td>
+        <td className="p-3 border-b border-black">{med.fechaFabricacion.split('T')[0]}</td>
+        <td className="p-3 border-b border-black">{med.fechaVencimiento.split('T')[0]}</td>
+        <td className="p-3 border-b border-black">{med.presentacion}</td>
+        <td className="p-3 border-b border-black text-center">{med.stock}</td>
+        <td className="p-3 border-b border-black text-right">${med.precioVentaUni.toFixed(2)}</td>
+        <td className="p-3 border-b border-black text-right">${med.precioVentaPres.toFixed(2)}</td>
+        <td className="p-3 border-b border-black">{med.marca}</td>
+        <td className="p-3 border-b border-black flex gap-2 justify-center">
+          <button
+            onClick={() => editarMedicamento(med)}
+            className="flex items-center gap-1 bg-yellow-400 hover:bg-yellow-500 text-white px-3 py-1 rounded-md shadow-md transition"
+            aria-label="Editar medicamento"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M11 17h2m-6 4h12a2 2 0 002-2v-5a2 2 0 00-2-2h-3l-2-2H7v9a2 2 0 002 2z" />
+            </svg>
+            Editar
+          </button>
+          <button
+            onClick={() => abrirModalEliminar(med.CodMedicamento)}
+            className="flex items-center gap-1 bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-md shadow-md transition"
+            aria-label="Eliminar medicamento"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Eliminar
+          </button>
+        </td>
+      </tr>
+    ))
+  )}
+</tbody>
+
   </table>
   {modalDeleteOpen && (
   <div className="fixed inset-0 bg-white/40 backdrop-blur-[4px flex items-center justify-center z-50">
